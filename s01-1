@@ -1,0 +1,26 @@
+#!/bin/bash
+prv=''
+cnt=0
+chkposnum()
+{
+	case $1 in
+		'' | *[!0123456789]*)
+			printf '%s\n' "$0: $1: invalid digit" ; exit 1
+	esac
+}
+
+if [[ ! $1 ]] ; then
+	echo 'Source filename needed!'
+	exit 1
+fi
+while IFS= read -r i; do
+	chkposnum $i 
+
+	if [[ $prv != '' ]] ; then
+		if [[ $i -gt $prv ]] ; then
+			cnt=$(( $cnt + 1 ))
+		fi
+	fi
+	prv="$i"
+done < "$1"
+echo Count=$cnt
