@@ -1,4 +1,5 @@
 #!/bin/bash
+#count how many lines have a (positive integer) value larger than the previous one
 prv=''
 cnt=0
 chkposnum()
