@@ -1,0 +1,1 @@
+../../mylibs/mystrings.h
