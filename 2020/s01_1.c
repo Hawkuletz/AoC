@@ -20,10 +20,10 @@ int srch(int *res, int *arr, int i0, int len, int lvl, int s)
 		if(x>s) return 1;
 		if(lvl!=0) /* all but last level recurse one level down */
 		{
-			rx=srch(res,arr,i+1,lvl-1,s-x);
+			rx=srch(res,arr,i+1,len,lvl-1,s-x);
 			if(rx==0)	/* success */
 			{
-				res[lvl]=i;
+				res[lvl]=x;
 				return 0;
 			}
 			else if(rx<0)	/* error, shouldn't happen */
@@ -31,7 +31,7 @@ int srch(int *res, int *arr, int i0, int len, int lvl, int s)
 		}
 		else if(x==s)	/* last level */
 		{
-			res[0]=i;
+			res[0]=x;
 			return 0;
 		}
 	}
@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
 	int *arr;
 	int *res;
 	int lc,i,lvl,ds;
-	int idx1=0,idx2=0;
 	if(argc!=4)
 	{
 		fprintf(stderr,"Usage: %s <filename> <values_cnt> <desired_sum>\n",argv[0]);
