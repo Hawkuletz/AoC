@@ -1,0 +1,36 @@
+#!/bin/bash
+#compute position from movements and aim
+#values read from stdin
+
+aim=0
+hpos=0
+depth=0
+
+updpos()
+{
+	a=($1)
+	case $a[0] in
+		'forward')
+			
+		'up')
+		'down')
+		*)
+	esac
+}
+
+while IFS= read -r crt; do
+	updpos $crt
+	chkposnum $crt
+	# we only have 3 elements, no need for another loop
+	s0=$((a[0]+a[1]+a[2]))
+
+	# replace array element and reset index if needed
+	a[i++]=$crt
+	if [[ $i -eq 3 ]] ; then i=0 ; fi
+
+	# sum again
+	s1=$((a[0]+a[1]+a[2]))
+	((lc++))
+	if [[ $lc -gt 3 ]] && [[ s1 -gt s0 ]] ; then ((cnt++)) ; fi
+done < "$1"
+echo Count=$cnt
