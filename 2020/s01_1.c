@@ -37,6 +37,39 @@ int srch(int *arr, int l, int s, int *idx1, int *idx2)
 	return 1;
 }
 
+int srch(int *res, int *arr, int i0, int l, int lvl, int s)
+{
+	int i,x,rx;
+	if(i0 >= (l-1))
+		return -1;
+	s-=arr[i0];
+	for(i=i0+1;i<l;i++)
+	{
+		x=arr[i];
+		if(x>s) return 1;
+		if(lvl==0)
+		{
+			if(x==s)
+			{
+				res[lvl]=i;
+				return 0;
+			}
+		}
+		else
+		{
+			rx=srch(res,arr,i,l,lvl-1,s);
+			if(rx==0)
+			{
+				res[lvl]=i;
+				return 0;
+			}
+			else if(rx<0)
+				return -1;
+		}
+	}
+	return -1;
+}
+
 int main(int argc, char *argv[])
 {
 	char *buf;
