@@ -1,0 +1,21 @@
+#!/bin/bash
+# compute position given commands in a data file
+# more than one way to solve this, let's go for the cute (even if somewhat inefficient)
+calcsum()
+{
+	sum=0
+	while read i ; do (( sum+=i )) ; done
+	echo $sum
+}
+
+if [[ ! $1 ]] ; then
+	echo 'Source filename needed!'
+	exit 1
+fi
+
+fwsum=`grep forward $1 | cut -f2 -d\  | calcsum`
+dwsum=`grep down $1 | cut -f2 -d\  | calcsum`
+upsum=`grep up $1 | cut -f2 -d\  | calcsum`
+depth=$(( dwsum-upsum ))
+echo "Horizontal = $fwsum"
+echo "Depth = $depth"
