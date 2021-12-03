@@ -1,0 +1,112 @@
+#!/bin/bash
+#bit operations!
+
+bitcount=()
+lines=()
+
+# $1 = position (L-to-R, 0 based)
+# $2 calc. type (oxy|scr; output majority|minority)
+# using asrc
+countbits()
+{
+	local l=${#asrc[@]}
+	local cnt=0
+	local i
+	echo "l=$l" >&2
+	if (( l==1 )) ; then
+		x=${asrc[0]}
+		echo ${x:$1:1}
+		exit
+	fi
+	for (( i=0 ; i<l ; i++ )) ; do
+		x=${asrc[i]}
+		case ${x:$1:1} in
+			'0')
+				(( cnt-- ));;
+			'1')
+				(( cnt++ ));;
+			*)
+				echo "Undefined char encountered in $x at $1" >&2
+				exit 1;;
+		esac
+	done
+	if [[ $2 = "oxy" ]] ; then
+		if (( cnt>=0 )) ; then
+			echo 1
+		else
+			echo 0
+		fi
+	elif [[ $2 = "scr" ]] ; then
+		if (( cnt>=0 )) ; then
+			echo 0
+		else
+			echo 1
+		fi
+	fi
+}
+
+#copy masked values ($1 = mask)
+#adst <- asrc where asrc starts with mask
+copymask()
+{
+	local l=${#asrc[@]}
+	local di=0
+	for (( si=0 ; si<l ; si++ )) ; do
+		if [[ "${asrc[si]}" = "$1"* ]] ; then
+			adst[di++]=${asrc[si]}
+		fi
+	done
+}
+
+
+btodec()
+{
+# since bits are represented in big endian notation (i.e. 0 is MOST SIGNIFICANT
+# we have to perform some gymnastic in order to extract decimal numbers from this
+
+# cp = current position (in array, starting at last element), i is used for bit shifting
+# (i.e. i is the bit position, counting from LSB)
+	local cp=${#1}
+	local i=0
+	local v=0
+	while (( cp-- > 0 )) ; do
+		if (( ${1:cp:1}>0 )) ; then
+			(( v += 1<<i ))
+		fi
+		(( i++ ))
+	done
+	echo $v
+}
+
+i=0
+while IFS= read -r crt; do
+	lines[$i]="$crt"
+	(( i++ ))
+done
+asrc=("${lines[@]}")
+x=${lines[0]}
+m=''
+l=${#x}
+for (( i=0 ; i<l ; i++ )) ; do
+	x=$(countbits $i oxy)
+	m="$m$x"
+	adst=()
+	copymask $m
+	asrc=("${adst[@]}")
+done
+oxy=$(btodec $m)
+echo "Oxy = $oxy"
+
+asrc=("${lines[@]}")
+m=''
+for (( i=0 ; i<l ; i++ )) ; do
+	x=$(countbits $i scr)
+	m="$m$x"
+	echo "m=$m"
+	adst=()
+	copymask $m
+	asrc=("${adst[@]}")
+done
+scr=$(btodec $m)
+echo "Scr = $scr"
+
