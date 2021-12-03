@@ -2,10 +2,7 @@
 #bit operations!
 
 bitcount=()
-oxybits=()
-scrbits=()
 
-# string
 updbc()
 {
 	l=${#1}
@@ -15,31 +12,6 @@ updbc()
 				(( bitcount[i]-=1 ));;
 			'1')
 				(( bitcount[i]+=1 ));;
-			*)
-				echo "Undefined char encountered in $1 at $i"
-				exit 1;;
-		esac
-	done
-}
-
-# aoc naming, sort of mask and count
-oxyscrbc()
-{
-	l=${#1}
-	for (( i=0 ; i<$l ; i++ )) ; do
-		case ${1:i:1} in
-			'0')
-				if (( bitcount[i] < 0 )) ; then
-					(( oxybits[i]-=1 ))
-				else
-					(( scrbits[i]-=1 ))
-				fi;;
-			'1')
-				if (( bitcount[i] > 0 )) ; then
-					(( oxybits[i]+=1 ))
-				else
-					(( scrbits[i]+=1 ))
-				fi;;
 			*)
 				echo "Undefined char encountered in $1 at $i"
 				exit 1;;
@@ -72,7 +44,5 @@ bctomcb()
 
 while IFS= read -r crt; do
 	updbc $crt
-done <$1
-mask=("${bitcount[@]}")
+done
 bctomcb
-
