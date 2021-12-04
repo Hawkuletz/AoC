@@ -88,6 +88,15 @@ void mark_card(int d, int *card)
 			card[i+25]=1;
 }
 
+void print_sum(int *card)
+{
+	int *mark=card+25;
+	int i,sum=0;
+	for(i=0;i<25;i++)
+		if(!mark[i]) sum+=card[i];
+	printf("Sum is %d\n",sum);
+}
+
 int chk_card(int *card)
 {
 	int i,j,h,v;
@@ -109,6 +118,7 @@ int chk_card(int *card)
 		{
 			printf("BINGO ON CARD\n");
 			print_card(card);
+			print_sum(card);
 			return 1;
 		}
 	}
