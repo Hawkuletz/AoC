@@ -1,6 +1,7 @@
 #!/bin/bash
 # fish population
 fisharr=()
+fishgrp=()
 
 procfish()
 {
@@ -13,26 +14,43 @@ procfish()
 	fi
 }
 
+procgrp()
+{
+	local t=${fishgrp[0]};
+	for (( i=0; i<8 ; i++ )) ; do
+		(( fishgrp[i]=fishgrp[i+1] ))
+	done
+	(( fishgrp[8]=t ))
+	(( fishgrp[6]+=t ))
+}
+
+grpinit()
+{
+	for (( i=0 ; i<9 ; i++ )) ; do
+		fishgrp+=(0)
+	done
+	for crt in "${fisharr[@]}" ; do
+		(( fishgrp[crt]++ ))
+	done
+}
+
 IFS=, read -ra fisharr
-#echo "Before"
-#for i in "${fisharr[@]}" ; do
-#	echo -n " $i"
-#done
+
+grpinit
+for (( i=0 ; i<9 ; i++ )) ; do
+	echo "g[$i]=${fishgrp[$i]}"
+done
 rc=$1
 while (( rc-- )) ; do
 	echo "days remaining $rc"
-	fc="${#fisharr[@]}"
-	for (( i=0 ; i<fc ; i++ )) ; do
-		procfish $i
-	done
+	procgrp
 done
-fc="${#fisharr[@]}"
-#echo
-#echo "After"
-#for i in "${fisharr[@]}" ; do
-#	echo -n " $i"
-#done
-
-echo
+for (( i=0 ; i<9 ; i++ )) ; do
+	echo "g[$i]=${fishgrp[$i]}"
+done
+fc=0
+for (( i=0 ; i<9 ; i++ )) ; do
+	(( fc+=fishgrp[$i] ))
+done
 echo "No. of fish: $fc"
 
