@@ -14,14 +14,25 @@ procfish()
 }
 
 IFS=, read -ra fisharr
+#echo "Before"
+#for i in "${fisharr[@]}" ; do
+#	echo -n " $i"
+#done
+rc=$1
+while (( rc-- )) ; do
+	echo "days remaining $rc"
+	fc="${#fisharr[@]}"
+	for (( i=0 ; i<fc ; i++ )) ; do
+		procfish $i
+	done
+done
 fc="${#fisharr[@]}"
+#echo
+#echo "After"
+#for i in "${fisharr[@]}" ; do
+#	echo -n " $i"
+#done
 
-for (( i=0 ; i<fc ; i++ )) ; do
-	procfish $i
-done
-
-for i in "${fisharr[@]}" ; do
-	echo -n " $i"
-done
 echo
+echo "No. of fish: $fc"
 
