@@ -1,0 +1,27 @@
+#!/bin/bash
+# fish population
+fisharr=()
+
+procfish()
+{
+	local t=${fisharr[$1]}
+	if(( t != 0 )) ; then
+		(( fisharr[$1]-- ))
+	else
+		(( fisharr[$1]=6 ))
+		fisharr+=(8)
+	fi
+}
+
+IFS=, read -ra fisharr
+fc="${#fisharr[@]}"
+
+for (( i=0 ; i<fc ; i++ )) ; do
+	procfish $i
+done
+
+for i in "${fisharr[@]}" ; do
+	echo -n " $i"
+done
+echo
+
