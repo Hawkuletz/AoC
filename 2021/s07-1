@@ -1,14 +1,32 @@
 #!/bin/bash
 # crustacean fuel consumption
+ucrabs=()	# unsorted crabs
 crabarr=()
 cons=0
 
 
+sort_crabs()
+{
+	i=0
+	for crt in "${ucrabs[@]}" ; do
+		echo $crt
+	done | sort -n |
+	while read -r crt ; do
+		if (( i!=0 )) ; then
+			echo -n ','
+		fi
+		(( i++ ))
+		echo -n "$crt"
+	done
+	echo
+}
+
+
+# use this for first challenge
 chkcons_1()
 {
 	cons=0
 	dp=$1
-	echo "Checking at $dp"
 	for crt in "${crabarr[@]}" ; do
 		if (( crt > dp )) ; then
 			(( cons+=(crt-dp) ))
@@ -16,14 +34,13 @@ chkcons_1()
 			(( cons+=(dp-crt) ))
 		fi
 	done
-	echo "Consumption is $cons"
 }
 
+# use this for second challenge
 chkcons_2()
 {
 	cons=0
 	dp=$1
-	echo "Checking at $dp"
 	for crt in "${crabarr[@]}" ; do
 		if (( crt > dp )) ; then
 			delta=$((crt-dp))
@@ -32,11 +49,13 @@ chkcons_2()
 		fi
 		(( cons+=(delta*(delta+1))/2 ))
 	done
-	echo "Consumption is $cons"
 }
 
 
-IFS=, read -ra crabarr
+IFS=, read -ra ucrabs
+x=$(sort_crabs)
+IFS=, read -ra crabarr <<<"$x"
+
 cc="${#crabarr[@]}"
 echo "$cc crabs"
 mp=$((cc/2))
