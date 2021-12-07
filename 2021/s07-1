@@ -1,0 +1,49 @@
+#!/bin/bash
+# crustacean fuel consumption
+crabarr=()
+cons=0
+
+
+chkcons()
+{
+	cons=0
+	dp=$1
+	echo "Checking at $dp"
+	for crt in "${crabarr[@]}" ; do
+		if (( crt > dp )) ; then
+			(( cons+=(crt-dp) ))
+		else
+			(( cons+=(dp-crt) ))
+		fi
+	done
+	echo "Consumption is $cons"
+}
+
+IFS=, read -ra crabarr
+cc="${#crabarr[@]}"
+echo "$cc crabs"
+mp=$((cc/2))
+disp=$((crabarr[mp]))
+chkcons $disp
+cbest=$cons
+bestdisp=$disp
+echo "Start with $cbest at $disp"
+while (( cons <= cbest )) ; do
+	(( disp++ ))
+	chkcons $disp
+	if (( cons < cbest )) ; then
+		cbest=$cons
+		bestdisp=$disp
+	fi
+done
+disp=$((crabarr[mp]-1))
+while (( cons <= cbest )) ; do
+	(( disp-- ))
+	chkcons $disp
+	if (( cons < cbest )) ; then
+		cbest=$cons
+		bestdisp=$disp
+	fi
+done
+
+echo "Best consumption $cbest at $bestdisp"
