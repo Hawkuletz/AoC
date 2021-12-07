@@ -37,16 +37,10 @@ grpinit()
 IFS=, read -ra fisharr
 
 grpinit
-for (( i=0 ; i<9 ; i++ )) ; do
-	echo "g[$i]=${fishgrp[$i]}"
-done
 rc=$1
 while (( rc-- )) ; do
-	echo "days remaining $rc"
+#	echo "days remaining $rc"
 	procgrp
-done
-for (( i=0 ; i<9 ; i++ )) ; do
-	echo "g[$i]=${fishgrp[$i]}"
 done
 fc=0
 for (( i=0 ; i<9 ; i++ )) ; do
