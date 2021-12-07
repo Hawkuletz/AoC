@@ -1,0 +1,85 @@
+#!/bin/bash
+# crustacean fuel consumption
+ucrabs=()	# unsorted crabs
+crabarr=()
+cons=0
+
+
+sort_crabs()
+{
+	i=0
+	for crt in "${ucrabs[@]}" ; do
+		echo $crt
+	done | sort -n |
+	while read -r crt ; do
+		if (( i!=0 )) ; then
+			echo -n ','
+		fi
+		(( i++ ))
+		echo -n "$crt"
+	done
+	echo
+}
+
+
+# use this for first challenge
+chkcons_1()
+{
+	cons=0
+	dp=$1
+	for crt in "${crabarr[@]}" ; do
+		if (( crt > dp )) ; then
+			(( cons+=(crt-dp) ))
+		else
+			(( cons+=(dp-crt) ))
+		fi
+	done
+}
+
+# use this for second challenge
+chkcons_2()
+{
+	cons=0
+	dp=$1
+	for crt in "${crabarr[@]}" ; do
+		if (( crt > dp )) ; then
+			delta=$((crt-dp))
+		else
+			delta=$((dp-crt))
+		fi
+		(( cons+=(delta*(delta+1))/2 ))
+	done
+}
+
+
+IFS=, read -ra ucrabs
+x=$(sort_crabs)
+IFS=, read -ra crabarr <<<"$x"
+
+cc="${#crabarr[@]}"
+echo "$cc crabs"
+mp=$((cc/2))
+disp=$((crabarr[mp]))
+chkcons_2 $disp
+cbest=$cons
+bestdisp=$disp
+echo "Start with $cbest at $disp"
+while (( cons <= cbest )) ; do
+	(( disp++ ))
+	chkcons_2 $disp
+	if (( cons < cbest )) ; then
+		cbest=$cons
+		bestdisp=$disp
+	fi
+done
+disp=$((crabarr[mp]-1))
+while (( cons <= cbest )) ; do
+	(( disp-- ))
+	chkcons_2 $disp
+	if (( cons < cbest )) ; then
+		cbest=$cons
+		bestdisp=$disp
+	fi
+done
+
+echo "Best consumption $cbest at $bestdisp"
