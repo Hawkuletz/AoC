@@ -4,7 +4,7 @@ crabarr=()
 cons=0
 
 
-chkcons()
+chkcons_1()
 {
 	cons=0
 	dp=$1
@@ -19,18 +19,35 @@ chkcons()
 	echo "Consumption is $cons"
 }
 
+chkcons_2()
+{
+	cons=0
+	dp=$1
+	echo "Checking at $dp"
+	for crt in "${crabarr[@]}" ; do
+		if (( crt > dp )) ; then
+			delta=$((crt-dp))
+		else
+			delta=$((dp-crt))
+		fi
+		(( cons+=(delta*(delta+1))/2 ))
+	done
+	echo "Consumption is $cons"
+}
+
+
 IFS=, read -ra crabarr
 cc="${#crabarr[@]}"
 echo "$cc crabs"
 mp=$((cc/2))
 disp=$((crabarr[mp]))
-chkcons $disp
+chkcons_2 $disp
 cbest=$cons
 bestdisp=$disp
 echo "Start with $cbest at $disp"
 while (( cons <= cbest )) ; do
 	(( disp++ ))
-	chkcons $disp
+	chkcons_2 $disp
 	if (( cons < cbest )) ; then
 		cbest=$cons
 		bestdisp=$disp
@@ -39,7 +56,7 @@ done
 disp=$((crabarr[mp]-1))
 while (( cons <= cbest )) ; do
 	(( disp-- ))
-	chkcons $disp
+	chkcons_2 $disp
 	if (( cons < cbest )) ; then
 		cbest=$cons
 		bestdisp=$disp
