@@ -1,0 +1,85 @@
+#!/bin/bash
+# 7digit displays!
+
+uarr=()
+sarr=()
+
+segstxtarr=()
+outtxtarr=()
+
+# why is bash missing this? my approach is rather convoluted
+gen_sort_arr_hlp()
+{
+	local crt=''
+	for crt in "${uarr[@]}" ; do
+		echo $crt
+	done | sort -n |
+	local i=0; while read -r crt ; do
+		if (( i!=0 )) ; then
+			echo -n ','
+		fi
+		(( i++ ))
+		echo -n "$crt"
+	done
+	echo
+}
+
+gen_sort_arr()
+{
+	sarr=()
+	local x=$(gen_sort_arr_hlp)
+	IFS=, read -ra sarr <<<"$x"
+}
+
+# load $1 into uarr, char by char (I don't know how to process each char otherwise)
+str2arr()
+{
+	local l=${#1}
+	uarr=()
+	for (( i=0 ; i<l ; i++ ))
+	{
+		
+
+}
+
+
+# process segment line (sort letters in each segment)
+procsegln()
+{
+	local l=0
+	uarr=()
+	IFS=' ' read -r crt ; do
+		l=${#crt}
+		for (( i=0 ; i<l ; i++ )) ; do
+
+
+
+
+	done <<<"$crtsegln"
+	newsegln=''
+	
+
+	for (( i=0 ; i<10 ; i++ ))
+	{
+		crt=segs[$i
+
+
+	}
+}
+
+
+i=0
+while IFS= read -r ln; do
+	lnarr[i++]=$ln
+done
+
+lcnt=${#lnarr[@]}
+
+for (( i=0 ; i<lcnt ; i++ )) ; do
+	crtsegln="${lnarr[i]%%|*}"
+	crtsegln="${crtsegln% *}"
+	procsegln
+#	echo "seg[$i]=$crtsegln|"
+done
+
+
