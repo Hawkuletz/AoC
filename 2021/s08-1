@@ -6,6 +6,9 @@ sarr=()
 
 segstxtarr=()
 outtxtarr=()
+digits=()
+
+segsarr=() # experimental
 
 # why is bash missing this? my approach is rather convoluted
 gen_sort_arr_hlp()
@@ -36,35 +39,46 @@ str2arr()
 {
 	local l=${#1}
 	uarr=()
-	for (( i=0 ; i<l ; i++ ))
-	{
-		
-
+	for (( i=0 ; i<l ; i++ )) ; do
+		uarr[$i]=${1:i:1}
+	done
 }
 
 
-# process segment line (sort letters in each segment)
+# process segment line
 procsegln()
 {
+	local i=0
 	local l=0
-	uarr=()
-	IFS=' ' read -r crt ; do
+	while IFS=' ' read -r crt ; do
 		l=${#crt}
-		for (( i=0 ; i<l ; i++ )) ; do
-
-
-
-
+		case $l in
+			'2')
+				digits[1]=$crt;;
+			'3')
+				digits[8]=$crt;;
+			'4')
+				digits[4]=$crt;;
+			'7')
+				digits[7]=$crt;;
+			*)
+				segsarr[i++]=$crt;;
+		esac
 	done <<<"$crtsegln"
-	newsegln=''
-	
+	# search for 3 in segsarr
+	for (( i=0 ; i<7 ; i++ )) ; do
+		crt=${segsarr[$i]}
+		one=${digits[1]}
+		o0=${one:0:1}
+		o1=${one:1:1}
+		l=${#crt}
+		if [[ l==$crt == *"$$o0"* && $crt == *"$o1"* ]] ; then
+			digits[3]=$crt
+			unset 'segsarr[$i]'
+		fi
+	done
 
-	for (( i=0 ; i<10 ; i++ ))
-	{
-		crt=segs[$i
-
-
-	}
+		
 }
 
 
