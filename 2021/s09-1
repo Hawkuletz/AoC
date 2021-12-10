@@ -1,23 +1,15 @@
 #!/bin/bash
 # Smoke basin
 
-# we always need 3 arrays
 lnarr=()
-minsarr=()
-minsax=()
-minsay=()
+minsatx=()
+minsaty=()
 l3arr=(0 0 0)
 minscnt=0
 fillstack=()
 fillcnt=0
 risk=0
-prv=''
-crt=''
-nxt=''
 ll=0
-atfirst=1
-atlast=0
-ypos=0
 
 # geth x y, where y is index into lnarr, x is char in line; char must be a single digit; both are 0-based
 geth()
@@ -41,7 +33,7 @@ seth()
 	lnarr[y]=$ln
 }
 
-# chkaddmin check if digit at x,y is local minimum; if it is, append it to minsarr
+# chkaddmin check if digit at x,y is local minimum; if it is, append its coordinates to minsatx, minsaty arrays and calculate risk
 # assume crtln contains line at y (minor optimisation)
 chkaddmin()
 {
