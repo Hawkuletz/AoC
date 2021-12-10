@@ -2,7 +2,6 @@
 # Syntax errors
 # tokens are () [] {} <>
 
-tlev=0
 sescore=0
 acscoresarr=()
 acscorcnt=0
