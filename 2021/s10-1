@@ -1,0 +1,98 @@
+#!/bin/bash
+# Syntax errors
+# tokens are () [] {} <>
+# stacks respectively in t0-t3
+
+tlev=0
+sescore=0
+acscoresarr=()
+acscorcnt=0
+ochars='([{<'
+cchars=')]}>'
+
+acsorted=()
+
+
+declare -A sescorearr=([')']=3 [']']=57 ['}']=1197 ['>']=25137)
+declare -A acscorearr=(['(']=1 ['[']=2 ['{']=3 ['<']=4)
+
+# i should really write a generic one (this is copied from crabs challenge)
+sort_scores_hlp()
+{
+	local i=0
+	local crt
+	for crt in "${acscoresarr[@]}" ; do
+		echo $crt
+	done | sort -n |
+	while read -r crt ; do
+		if (( i!=0 )) ; then
+			echo -n ','
+		fi
+		(( i++ ))
+		echo -n "$crt"
+	done
+	echo
+}
+
+sort_scores()
+{
+	local x=$(sort_scores_hlp)
+	IFS=, read -ra acsorted <<<"$x"
+}
+
+newlevel()
+{
+	lcarr[tlev++]="$1"
+}
+
+prevlevel()
+{
+	if (( tlev==0 )) ; then return 1 ; fi
+	(( tlev-- ))
+	local lc="${lcarr[tlev]}"
+	lc=$(tr '([{<' ')]}>' <<< "$lc")
+	if [[ "$1" != "$lc" ]] ; then return 1 ; fi
+	return 0
+}
+
+chkline()
+{
+	local l=${#1}
+	local c=''
+	local lscore=0
+	local acscore=0
+	lcarr=()
+	tlev=0
+	for (( i=0 ; i<l ; i++ )) ; do
+		c="${1:$i:1}"
+		if [[ "$ochars" == *"$c"* ]] ; then
+			newlevel "$c"
+		elif [[ "$cchars" == *"$c"* ]] ; then
+			if ! prevlevel "$c" ; then
+#				echo "Unexpected $c"
+				lscore=${sescorearr["$c"]}
+				(( sescore+=lscore ))
+				return
+			fi
+		else
+			echo "Unknown character $c"
+			return
+		fi
+	done
+	while (( tlev>0 )) ; do
+		(( tlev-- ))
+		c=${lcarr[tlev]}
+		lscore=${acscorearr["$c"]}
+		(( acscore=5*acscore+lscore ))
+	done
+	acscoresarr[acscorcnt++]=$acscore
+}
+
+
+while IFS= read -r ln; do
+	chkline "$ln"
+done
+echo "Syntax Error Score = $sescore"
+sort_scores
+i=acscorcnt/2
+echo "Autocomplete score = ${acsorted[i]}"
