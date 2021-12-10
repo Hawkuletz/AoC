@@ -6,6 +6,7 @@ grandtotal=0
 segsarr=()
 declare -A seg2val
 
+# check that crt contains all the segments for 3 - to find the 9
 chk39()
 {
 	declare -A a
@@ -24,6 +25,7 @@ chk39()
 	return  $(( sf!=5 ))
 }
 
+# sort segments
 sortseg()
 {
 	declare -A a
@@ -119,16 +121,6 @@ procsegln()
 	done
 
 	# we now have d0 -> d9 defined with active segments for each digit
-#	echo "0 - $d0"
-#	echo "1 - $d1"
-#	echo "2 - $d2"
-#	echo "3 - $d3"
-#	echo "4 - $d4"
-#	echo "5 - $d5"
-#	echo "6 - $d6"
-#	echo "7 - $d7"
-#	echo "8 - $d8"
-#	echo "9 - $d9"
 
 	seg2val=()
 
@@ -160,8 +152,6 @@ dispdigits()
 	(( grandtotal+=10#$crtdisp ))
 }
 
-
-i=0
 while IFS= read -r ln; do
 	lnarr[i++]=$ln
 done
