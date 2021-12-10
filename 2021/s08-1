@@ -10,39 +10,6 @@ digits=()
 
 segsarr=() # experimental
 
-# why is bash missing this? my approach is rather convoluted
-gen_sort_arr_hlp()
-{
-	local crt=''
-	for crt in "${uarr[@]}" ; do
-		echo $crt
-	done | sort -n |
-	local i=0; while read -r crt ; do
-		if (( i!=0 )) ; then
-			echo -n ','
-		fi
-		(( i++ ))
-		echo -n "$crt"
-	done
-	echo
-}
-
-gen_sort_arr()
-{
-	sarr=()
-	local x=$(gen_sort_arr_hlp)
-	IFS=, read -ra sarr <<<"$x"
-}
-
-# load $1 into uarr, char by char (I don't know how to process each char otherwise)
-str2arr()
-{
-	local l=${#1}
-	uarr=()
-	for (( i=0 ; i<l ; i++ )) ; do
-		uarr[$i]=${1:i:1}
-	done
-}
 
 chk39()
 {
@@ -53,10 +20,8 @@ chk39()
 		s=${d3:$i:1}
 		a[$s]=1
 	done
-	declare -p a
 	for (( i=0 ; i<6 ; i++ )) ; do
 		x=${crt:$i:1}
-		echo "a[$x] = ${a[$x]}"
 		if [[ ${a[$x]} == 1 ]] ; then
 			(( sf++ ))
 		fi
@@ -64,12 +29,33 @@ chk39()
 	return  $(( sf!=5 ))
 }
 
+sortseg()
+{
+	declare -A a
+	local i
+	srt=''
+	local l=${#crt}
+	for (( i=0 ; i<l ; i++ )) ; do
+		s=${crt:$i:1}
+		a[$s]=1
+	done
+	for i in a b c d e f g ; do
+		if [[ ${a[$i]} == 1 ]] ; then
+			srt+=$i
+		fi
+	done
+}
+
+
 # process segment line
 procsegln()
 {
 	local i=0
 	local l=0
-	while IFS=' ' read -r crt ; do
+	segsarr=()
+	for crt in $crtsegln ; do
+		sortseg
+		crt=$srt
 		l=${#crt}
 		case $l in
 			'2')
@@ -83,7 +69,8 @@ procsegln()
 			*)
 				segsarr[i++]=$crt;;
 		esac
-	done <<<"$crtsegln"
+	done
+
 
 	# one's segments
 	d10=${d1:0:1}
@@ -121,18 +108,44 @@ procsegln()
 	for crt in "${segsarr[@]}" ; do
 		l=${#crt}
 		if [[ $l == 5 ]] ; then
-			if [[ $crt == *"$d1top" ]] ; then
-				d2 = $crt
+			if [[ $crt == *"$d1top"* ]] ; then
+				d2=$crt
 			else
-				d5 = $crt
+				d5=$crt
 			fi
-			segsarr[$i]=''
 		fi
 		if [[ $l == 6 ]] ; then
-			$
-		(( i++ ))
+			if chk39 ; then
+				d9=$crt
+			else
+				d0=$crt
+			fi
+		fi
 	done
 
+	# we now have d0 -> d9 defined with active segments for each digit
+	declare -A seg2val
+	echo "0 - $d0"
+	echo "1 - $d1"
+	echo "2 - $d2"
+	echo "3 - $d3"
+	echo "4 - $d4"
+	echo "5 - $d5"
+	echo "6 - $d6"
+	echo "7 - $d7"
+	echo "8 - $d8"
+	echo "9 - $d9"
+
+	seg2val[$d0]=0
+	seg2val[$d1]=1
+	seg2val[$d2]=2
+	seg2val[$d3]=3
+	seg2val[$d4]=4
+	seg2val[$d5]=5
+	seg2val[$d6]=6
+	seg2val[$d7]=7
+	seg2val[$d8]=8
+	seg2val[$d9]=9
 }
 
 
