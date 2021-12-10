@@ -19,16 +19,6 @@ atfirst=1
 atlast=0
 ypos=0
 
-# load $1 into arr, char by char (I don't know how to process each char otherwise)
-str2arr()
-{
-	local l=${#1}
-	arr=()
-	for (( i=0 ; i<l ; i++ )) ; do
-		arr[$i]=${1:i:1}
-	done
-}
-
 # geth x y, where y is index into lnarr, x is char in line; char must be a single digit; both are 0-based
 geth()
 {
@@ -77,8 +67,8 @@ chkaddmin()
 	fi
 	minsatx[minscnt]=$x
 	minsaty[minscnt]=$y
-	minsarr[minscnt++]=$h
-	echo "min $h at $x,$y"
+	(( minscnt++ ))
+#	echo "min $h at $x,$y"
 	(( risk+=h+1 ))
 	return 0
 }
@@ -88,7 +78,6 @@ floodfill()
 {
 	local x=$1
 	local y=$2
-#	echo "x=$x y=$y"
 	if (( x<0 || x>=ll || y<0 || y>=lcnt )) ; then return; fi
 	geth $x $y
 	if (( $?==9 )) ; then return; fi
@@ -131,11 +120,11 @@ for (( y=0 ; y<lcnt ; y++ )) ; do
 		chkaddmin
 	done
 done
-
+echo "risk is $risk"
 for (( i=0 ; i<minscnt ; i++ )) ; do
 	fillcnt=0
 	floodfill ${minsatx[i]} ${minsaty[i]}
-	echo "Fillcnt=$fillcnt"
+#	echo "Fillcnt=$fillcnt"
 	chklarge
 done
 
