@@ -1,7 +1,6 @@
 #!/bin/bash
 # Syntax errors
 # tokens are () [] {} <>
-# stacks respectively in t0-t3
 
 tlev=0
 sescore=0
@@ -11,7 +10,6 @@ ochars='([{<'
 cchars=')]}>'
 
 acsorted=()
-
 
 declare -A sescorearr=([')']=3 [']']=57 ['}']=1197 ['>']=25137)
 declare -A acscorearr=(['(']=1 ['[']=2 ['{']=3 ['<']=4)
@@ -69,7 +67,6 @@ chkline()
 			newlevel "$c"
 		elif [[ "$cchars" == *"$c"* ]] ; then
 			if ! prevlevel "$c" ; then
-#				echo "Unexpected $c"
 				lscore=${sescorearr["$c"]}
 				(( sescore+=lscore ))
 				return
@@ -79,6 +76,7 @@ chkline()
 			return
 		fi
 	done
+
 	while (( tlev>0 )) ; do
 		(( tlev-- ))
 		c=${lcarr[tlev]}
