@@ -1,15 +1,10 @@
 #!/bin/bash
 # 7digit displays!
 
-uarr=()
-sarr=()
-
-segstxtarr=()
-outtxtarr=()
-digits=()
-
-segsarr=() # experimental
-
+cntdigits=0
+grandtotal=0
+segsarr=()
+declare -A seg2val
 
 chk39()
 {
@@ -124,17 +119,18 @@ procsegln()
 	done
 
 	# we now have d0 -> d9 defined with active segments for each digit
-	declare -A seg2val
-	echo "0 - $d0"
-	echo "1 - $d1"
-	echo "2 - $d2"
-	echo "3 - $d3"
-	echo "4 - $d4"
-	echo "5 - $d5"
-	echo "6 - $d6"
-	echo "7 - $d7"
-	echo "8 - $d8"
-	echo "9 - $d9"
+#	echo "0 - $d0"
+#	echo "1 - $d1"
+#	echo "2 - $d2"
+#	echo "3 - $d3"
+#	echo "4 - $d4"
+#	echo "5 - $d5"
+#	echo "6 - $d6"
+#	echo "7 - $d7"
+#	echo "8 - $d8"
+#	echo "9 - $d9"
+
+	seg2val=()
 
 	seg2val[$d0]=0
 	seg2val[$d1]=1
@@ -146,6 +142,22 @@ procsegln()
 	seg2val[$d7]=7
 	seg2val[$d8]=8
 	seg2val[$d9]=9
+}
+
+dispdigits()
+{
+	local v
+	local crtdisp=''
+	for crt in $crtdispln ; do
+		sortseg
+		v=${seg2val[$srt]}
+		if [[ '1478' == *"$v"* ]] ; then
+			(( cntdigits++ ));
+		fi
+		crtdisp+=$v
+	done
+	echo $crtdisp
+	(( grandtotal+=10#$crtdisp ))
 }
 
 
@@ -160,7 +172,11 @@ for (( i=0 ; i<lcnt ; i++ )) ; do
 	crtsegln="${lnarr[i]%%|*}"
 	crtsegln="${crtsegln% *}"
 	procsegln
-#	echo "seg[$i]=$crtsegln|"
+	crtdispln="${lnarr[i]##*|}"
+	crtdispln="${crtdispln# *}"
+	dispdigits
 done
 
+echo "Digit count=$cntdigits"
+echo "Grand total=$grandtotal"
 
