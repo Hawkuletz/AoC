@@ -153,16 +153,10 @@ dispdigits()
 }
 
 while IFS= read -r ln; do
-	lnarr[i++]=$ln
-done
-
-lcnt=${#lnarr[@]}
-
-for (( i=0 ; i<lcnt ; i++ )) ; do
-	crtsegln="${lnarr[i]%%|*}"
+	crtsegln="${ln%%|*}"
 	crtsegln="${crtsegln% *}"
 	procsegln
-	crtdispln="${lnarr[i]##*|}"
+	crtdispln="${ln##*|}"
 	crtdispln="${crtdispln# *}"
 	dispdigits
 done
