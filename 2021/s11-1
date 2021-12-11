@@ -14,7 +14,7 @@ gete()
 }
 
 # similar to gete but modifies data in nwarr
-# sete x y h
+# sete x y e
 sete()
 {
 	local x=$1
@@ -23,6 +23,7 @@ sete()
 	local ln=${nwarr[y]}
 	local lb=${ln:0:x}
 	local le=${ln:x+1}
+	echo "sete($x,$y,$e)"
 	ln="$lb$e$le"
 	nwarr[y]=$ln
 }
@@ -41,13 +42,15 @@ flash()
 	local y=$2
 	echo "Flash at $x $y"
 	sete $x $y 0
+	excite $(( x-1 )) $((y-1))
+	excite $x		  $((y-1))
+	excite $(( x+1 )) $((y-1))
+
 	excite $(( x-1 )) $y
 	excite $(( x+1 )) $y
-	excite $(( x-1 )) $((y-1))
-	excite $x $((y-1))
-	excite $(( x+1 )) $((y-1))
+
 	excite $(( x-1 )) $((y+1))
-	excite $x $((y-1))
+	excite $x		  $((y+1))
 	excite $(( x+1 )) $((y+1))
 
 }
@@ -63,7 +66,6 @@ excite()
 	if [[ $e = "f" ]] ; then return ; fi
 	if [[ $e = "0" ]] ; then return ; fi
 	if [[ $e = "9" ]] ; then
-		sete $x $y 0
 		flash $x $y
 	else
 		sete $x $y $((e+1))
