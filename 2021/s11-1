@@ -6,25 +6,33 @@ nwarr=()
 mx=0
 my=0
 
-# geth x y, where y is index into nwarr, x is char in line; char must be a single digit; both are 0-based
-geth()
+# gete x y, where y is index into nwarr, x is char in line; char must be a single digit; both are 0-based
+gete()
 {
 	local ln=${nwarr[$2]}
-	h=${ln:$1:1}
+	e=${ln:$1:1}
 }
 
-# similar to geth but modifies data in nwarr
-# seth x y h
-seth()
+# similar to gete but modifies data in nwarr
+# sete x y h
+sete()
 {
 	local x=$1
 	local y=$2
-	local h=$3
+	local e=$3
 	local ln=${nwarr[y]}
 	local lb=${ln:0:x}
 	local le=${ln:x+1}
-	ln="$lb$h$le"
+	ln="$lb$e$le"
 	nwarr[y]=$ln
+}
+
+dispnw()
+{
+	local crt
+	for crt in "${nwarr[@]}" ; do
+		echo $crt
+	done
 }
 
 flash()
@@ -32,6 +40,7 @@ flash()
 	local x=$1
 	local y=$2
 	echo "Flash at $x $y"
+	sete $x $y 0
 	excite $(( x-1 )) $y
 	excite $(( x+1 )) $y
 	excite $(( x-1 )) $((y-1))
@@ -47,16 +56,17 @@ excite()
 {
 	local x=$1
 	local y=$2
-	echo "excite at $x $y"
+	echo "Excite at $x $y"
 	if (( x<0 || x>=mx || y<0 || y>=my )) ; then return ; fi
-	geth $x $y
-	echo "e=$h"
-	if [[ $h -eq 0 ]] ; then return ; fi
-	if [[ $h -eq 9 ]] ; then
-		seth $x $y 0
+	gete $x $y
+	echo "e=$e"
+	if [[ $e = "f" ]] ; then return ; fi
+	if [[ $e = "0" ]] ; then return ; fi
+	if [[ $e = "9" ]] ; then
+		sete $x $y 0
 		flash $x $y
 	else
-		seth $x $y $((h+1))
+		sete $x $y $((e+1))
 	fi
 }
 
@@ -68,17 +78,16 @@ octostep()
 	local x
 	local y
 	for crt in "${lnarr[@]}" ; do
-		nln=$(tr '123456789' '234567890' <<<$crt)
+		nln=$(tr '0123456789' '123456789f' <<<$crt)
 		nwarr[i++]=$nln
 	done
 	for (( y=0 ; y<my ; y++ )) ; do
 		ln=${nwarr[y]}
-		echo "ln=$ln"
 		for (( x=0 ; x<mx ; x++ )) ; do
 			c=${ln:x:1}
-			echo "c=$c"
-			if [[ $c -eq 0 ]] ; then
+			if [[ $c = "f" ]] ; then
 				flash $x $y
+				ln=${nwarr[y]}
 			fi
 		done
 	done
@@ -93,11 +102,20 @@ done
 my=$i
 # assume all lines have the same length, get width (line length) from first line
 mx=${#lnarr[0]}
-for crt in "${lnarr[@]}" ; do
-	echo $crt
+
+if [[ ! $1 ]] ; then
+	steps=1
+else
+	steps=$1
+fi
+echo "steps: $steps"
+while (( steps-- )) ; do
+	for crt in "${lnarr[@]}" ; do
+		echo $crt
+	done
+	echo "---"
+	octostep
 done
-echo "---"
-octostep
 for crt in "${nwarr[@]}" ; do
 	echo $crt
 done
