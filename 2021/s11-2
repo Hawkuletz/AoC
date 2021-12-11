@@ -1,0 +1,125 @@
+#!/bin/bash
+# Dumbo Octopuses *automata*
+
+lnarr=()
+nwarr=()
+mx=0
+my=0
+flashcnt=0
+
+# gete x y, where y is index into nwarr, x is char in line; char must be a single digit; both are 0-based
+gete()
+{
+	local ln=${nwarr[$2]}
+	e=${ln:$1:1}
+}
+
+# similar to gete but modifies data in nwarr
+# sete x y e
+sete()
+{
+	local x=$1
+	local y=$2
+	local e=$3
+	local ln=${nwarr[y]}
+	local lb=${ln:0:x}
+	local le=${ln:x+1}
+#	echo "sete($x,$y,$e)"
+	ln="$lb$e$le"
+	nwarr[y]=$ln
+}
+
+displna()
+{
+	local crt
+	for crt in "${nwarr[@]}" ; do
+		echo $crt
+	done
+}
+
+flash()
+{
+	local x=$1
+	local y=$2
+#	echo "Flash at $x $y"
+	(( flashcnt++ ))
+	sete $x $y 0
+	excite $(( x-1 )) $((y-1))
+	excite $x		  $((y-1))
+	excite $(( x+1 )) $((y-1))
+
+	excite $(( x-1 )) $y
+	excite $(( x+1 )) $y
+
+	excite $(( x-1 )) $((y+1))
+	excite $x		  $((y+1))
+	excite $(( x+1 )) $((y+1))
+
+}
+
+excite()
+{
+	local x=$1
+	local y=$2
+#	echo "Excite at $x $y"
+	if (( x<0 || x>=mx || y<0 || y>=my )) ; then return ; fi
+	gete $x $y
+#	echo "e=$e"
+	if [[ $e = "f" ]] ; then return ; fi
+	if [[ $e = "0" ]] ; then return ; fi
+	if [[ $e = "9" ]] ; then
+		flash $x $y
+	else
+		sete $x $y $((e+1))
+	fi
+}
+
+octostep()
+{
+	local nln
+	local ln
+	local i=0
+	local x
+	local y
+	for crt in "${lnarr[@]}" ; do
+		nln=$(tr '0123456789' '123456789f' <<<$crt)
+		nwarr[i++]=$nln
+	done
+	for (( y=0 ; y<my ; y++ )) ; do
+		ln=${nwarr[y]}
+		for (( x=0 ; x<mx ; x++ )) ; do
+			c=${ln:x:1}
+			if [[ $c = "f" ]] ; then
+				flash $x $y
+				ln=${nwarr[y]}
+			fi
+		done
+	done
+	lnarr=("${nwarr[@]}")
+}
+
+
+i=0
+while IFS= read -r ln; do
+	lnarr[i++]="$ln"
+done
+my=$i
+# assume all lines have the same length, get width (line length) from first line
+mx=${#lnarr[0]}
+
+maxfl=$((mx*my))
+step=0
+echo "maxfl=$maxfl"
+while true ; do
+	(( step++ ))
+	displna
+	echo "---"
+	flashcnt=0
+	octostep
+	if (( flashcnt==maxfl )) ; then
+		displna
+		echo "Simultaneity achieved at step $step"
+		exit 0
+	fi
+
+done
