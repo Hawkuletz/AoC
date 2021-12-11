@@ -1,0 +1,104 @@
+#!/bin/bash
+# Dumbo Octopuses *automata*
+
+lnarr=()
+nwarr=()
+mx=0
+my=0
+
+# geth x y, where y is index into nwarr, x is char in line; char must be a single digit; both are 0-based
+geth()
+{
+	local ln=${nwarr[$2]}
+	h=${ln:$1:1}
+}
+
+# similar to geth but modifies data in nwarr
+# seth x y h
+seth()
+{
+	local x=$1
+	local y=$2
+	local h=$3
+	local ln=${nwarr[y]}
+	local lb=${ln:0:x}
+	local le=${ln:x+1}
+	ln="$lb$h$le"
+	nwarr[y]=$ln
+}
+
+flash()
+{
+	local x=$1
+	local y=$2
+	echo "Flash at $x $y"
+	excite $(( x-1 )) $y
+	excite $(( x+1 )) $y
+	excite $(( x-1 )) $((y-1))
+	excite $x $((y-1))
+	excite $(( x+1 )) $((y-1))
+	excite $(( x-1 )) $((y+1))
+	excite $x $((y-1))
+	excite $(( x+1 )) $((y+1))
+
+}
+
+excite()
+{
+	local x=$1
+	local y=$2
+	echo "excite at $x $y"
+	if (( x<0 || x>=mx || y<0 || y>=my )) ; then return ; fi
+	geth $x $y
+	echo "e=$h"
+	if [[ $h -eq 0 ]] ; then return ; fi
+	if [[ $h -eq 9 ]] ; then
+		seth $x $y 0
+		flash $x $y
+	else
+		seth $x $y $((h+1))
+	fi
+}
+
+octostep()
+{
+	local nln
+	local ln
+	local i=0
+	local x
+	local y
+	for crt in "${lnarr[@]}" ; do
+		nln=$(tr '123456789' '234567890' <<<$crt)
+		nwarr[i++]=$nln
+	done
+	for (( y=0 ; y<my ; y++ )) ; do
+		ln=${nwarr[y]}
+		echo "ln=$ln"
+		for (( x=0 ; x<mx ; x++ )) ; do
+			c=${ln:x:1}
+			echo "c=$c"
+			if [[ $c -eq 0 ]] ; then
+				flash $x $y
+			fi
+		done
+	done
+	lnarr=("${nwarr[@]}")
+}
+
+
+i=0
+while IFS= read -r ln; do
+	lnarr[i++]="$ln"
+done
+my=$i
+# assume all lines have the same length, get width (line length) from first line
+mx=${#lnarr[0]}
+for crt in "${lnarr[@]}" ; do
+	echo $crt
+done
+echo "---"
+octostep
+for crt in "${nwarr[@]}" ; do
+	echo $crt
+done
+
