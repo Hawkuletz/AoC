@@ -5,6 +5,7 @@ lnarr=()
 nwarr=()
 mx=0
 my=0
+flashcnt=0
 
 # gete x y, where y is index into nwarr, x is char in line; char must be a single digit; both are 0-based
 gete()
@@ -23,7 +24,7 @@ sete()
 	local ln=${nwarr[y]}
 	local lb=${ln:0:x}
 	local le=${ln:x+1}
-	echo "sete($x,$y,$e)"
+#	echo "sete($x,$y,$e)"
 	ln="$lb$e$le"
 	nwarr[y]=$ln
 }
@@ -40,7 +41,8 @@ flash()
 {
 	local x=$1
 	local y=$2
-	echo "Flash at $x $y"
+#	echo "Flash at $x $y"
+	(( flashcnt++ ))
 	sete $x $y 0
 	excite $(( x-1 )) $((y-1))
 	excite $x		  $((y-1))
@@ -59,10 +61,10 @@ excite()
 {
 	local x=$1
 	local y=$2
-	echo "Excite at $x $y"
+#	echo "Excite at $x $y"
 	if (( x<0 || x>=mx || y<0 || y>=my )) ; then return ; fi
 	gete $x $y
-	echo "e=$e"
+#	echo "e=$e"
 	if [[ $e = "f" ]] ; then return ; fi
 	if [[ $e = "0" ]] ; then return ; fi
 	if [[ $e = "9" ]] ; then
@@ -122,3 +124,4 @@ for crt in "${nwarr[@]}" ; do
 	echo $crt
 done
 
+echo "Flash count = $flashcnt"
