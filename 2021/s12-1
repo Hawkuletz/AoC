@@ -1,6 +1,7 @@
 #!/bin/bash
 # cave system
 declare -A clarr
+fpaths=0
 
 storelnkarr()
 {
@@ -31,21 +32,22 @@ walk()
 	local visited="$2"
 	visited+=":$1:"
 	if [[ "$1" = "end" ]] ; then
-		echo "PATH: $visited"
+#		echo "PATH: $visited"
+		(( fpaths++ ))
 		return
 	fi
-	echo "at $1"
+#	echo "at $1"
 	local dst="${clarr[$1]}"
 	local darr
 	IFS=, read -ra darr <<< "$dst"
 	for d in "${darr[@]}" ; do
-		echo "Found $d"
+#		echo "Found $d"
 		if [[ "$d" =~ [[:lower:]] ]] ; then
 			if [[ "$visited" = *":$d:"* ]] ; then continue ; fi
 		fi
-		echo "Would visit $d"
+#		echo "Would visit $d"
 		walk "$d" "$visited"
-		echo "back"
+#		echo "back"
 	done <<< "$dst"
 }
 
@@ -54,3 +56,5 @@ while IFS= read -r ln; do
 done
 
 walk start
+
+echo "Found $fpaths paths"
