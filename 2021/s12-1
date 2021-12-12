@@ -2,22 +2,26 @@
 # cave system
 declare -A clarr
 
+storelnkarr()
+{
+	if [[ $2 = "start" ]] ; then return ; fi
+	local lsrc="$1"
+	local ldst="$2"
+	local x="${clarr[$lsrc]}"
+	if [[ "$x" ]] ; then x+=',' ; fi
+	x+="$ldst"
+	clarr[$lsrc]="$x"
+}
+
 loadlink()
 {
 	local l1
 	local l2
-	local x
 	IFS='-' read l1 l2 <<< "$1"
 	# record direct path
-	x="${clarr[$l1]}"
-	if [[ "$x" ]] ; then x+=',' ; fi
-	x+="$l2"
-	clarr[$l1]="$x"
+	storelnkarr "$l1" "$l2"
 	# record reverse path
-	x="${clarr[$l2]}"
-	if [[ "$x" ]] ; then x+=',' ; fi
-	x+="$l1"
-	clarr[$l2]="$x"
+	storelnkarr "$l2" "$l1"
 }
 
 walk()
