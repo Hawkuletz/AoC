@@ -1,0 +1,69 @@
+#!/bin/bash
+# cave system
+declare -A clarr
+fpaths=0
+
+storelnkarr()
+{
+	if [[ $2 = "start" ]] ; then return ; fi
+	local lsrc="$1"
+	local ldst="$2"
+	local x="${clarr[$lsrc]}"
+	if [[ "$x" ]] ; then x+=',' ; fi
+	x+="$ldst"
+	clarr[$lsrc]="$x"
+}
+
+loadlink()
+{
+	local l1
+	local l2
+	IFS='-' read l1 l2 <<< "$1"
+	# record direct path
+	storelnkarr "$l1" "$l2"
+	# record reverse path
+	storelnkarr "$l2" "$l1"
+}
+
+walk()
+{
+	local p
+	local d
+	local visited="$2"
+	visited+=":$1:"
+	if [[ "$1" = "end" ]] ; then
+#		echo "PATH: $visited with $3"
+		(( fpaths++ ))
+		return
+	fi
+#	echo "at $1"
+#	echo "visited=$visited $3"
+	local specsmall="$3"
+	local dst="${clarr[$1]}"
+	local darr
+	IFS=, read -ra darr <<< "$dst"
+	for d in "${darr[@]}" ; do
+#		echo "At $1 ($3) Found $d"
+		if [[ "$d" =~ [[:lower:]] ]] ; then
+			if [[ "$visited" = *":$d:"* ]] ; then
+				if [[ "$specsmall" ]] ; then
+					continue
+				else
+					walk "$d" "$visited" "x"
+					continue
+				fi
+			fi
+		fi
+#		echo "Would visit $d"
+		walk "$d" "$visited" "$specsmall"
+#		echo "back"
+	done <<< "$dst"
+}
+
+while IFS= read -r ln; do
+	loadlink "$ln"
+done
+
+walk start
+
+echo "Found $fpaths paths"
