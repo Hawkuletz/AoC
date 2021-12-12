@@ -1,0 +1,52 @@
+#!/bin/bash
+# cave system
+declare -A clarr
+
+loadlink()
+{
+	local l1
+	local l2
+	local x
+	IFS='-' read l1 l2 <<< "$1"
+	# record direct path
+	x="${clarr[$l1]}"
+	if [[ "$x" ]] ; then x+=',' ; fi
+	x+="$l2"
+	clarr[$l1]="$x"
+	# record reverse path
+	x="${clarr[$l2]}"
+	if [[ "$x" ]] ; then x+=',' ; fi
+	x+="$l1"
+	clarr[$l2]="$x"
+}
+
+walk()
+{
+	local p
+	local d
+	local visited="$2"
+	visited+=":$1:"
+	if [[ "$1" = "end" ]] ; then
+		echo "PATH: $visited"
+		return
+	fi
+	echo "at $1"
+	local dst="${clarr[$1]}"
+	local darr
+	IFS=, read -ra darr <<< "$dst"
+	for d in "${darr[@]}" ; do
+		echo "Found $d"
+		if [[ "$d" =~ [[:lower:]] ]] ; then
+			if [[ "$visited" = *":$d:"* ]] ; then continue ; fi
+		fi
+		echo "Would visit $d"
+		walk "$d" "$visited"
+		echo "back"
+	done <<< "$dst"
+}
+
+while IFS= read -r ln; do
+	loadlink "$ln"
+done
+
+walk start
