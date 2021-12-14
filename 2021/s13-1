@@ -1,0 +1,146 @@
+#!/bin/bash
+# folding instructions
+lnarr=()
+lcnt=0
+flnarr=()
+i=0
+mx=0
+my=0
+x=0
+y=0
+parr=()
+
+loadxy()
+{
+	IFS=, read -r x y <<<"${lnarr[$1]}"
+}
+
+foldh()
+{
+	# if y > fpos (folding line), then new y is y + 2*(fpos-y)
+	local i
+	for (( i=0 ; i<lcnt ; i++ )) ; do
+		loadxy $i
+		if (( y>fpos )) ; then
+			y=$((y+2*(fpos-y)))
+			lnarr[$i]="$x,$y"
+		fi
+	done
+}
+
+foldv()
+{
+	# if x < fold position, then x=x+(fold-x)*2
+	local i
+	for (( i=0 ; i<lcnt ; i++ )) ; do
+		loadxy $i
+		if (( x<fpos )) ; then
+			x=$((x+2*(fpos-x)))
+			lnarr[$i]="$x,$y"
+		fi
+	done
+}
+
+setmax()
+{
+	if (( x>=mx )) ; then mx=$((x+1)) ; fi
+	if (( y>=my )) ; then my=$((y+1)) ; fi
+}
+
+normalize()
+{
+	# start by finding min x
+	local i
+	local minx=$mx
+	loadxy 0
+	for (( i=0 ; i<lcnt ; i++ )) ; do
+		loadxy $i
+		if (( x<minx )) ; then
+			minx=$x
+		fi
+	done
+	mx=0
+	my=0
+	# once we have min x, normalize everything to it, i.e. substract it from each x coordinate
+	# also recalculate mx,my for folded coordinates
+	for (( i=0 ; i<lcnt ; i++ )) ; do
+		loadxy $i
+		x=$((x-minx))
+		lnarr[$i]="$x,$y"
+		setmax
+	done
+}
+
+construct()
+{
+	# since using a 2d array using strings is rather unpleasant to type (and might take longer to run), I'll use a linear array
+	local i=0;
+	local pasize=$(( mx*my ))
+	for (( i=0 ; i<pasize ; i++ )) ; do
+		parr[i]=' '
+	done
+	
+	for (( i=0 ; i<lcnt ; i++ )) ; do
+		loadxy $i
+		parr[y*mx+x]='#'
+	done
+}
+
+showparr()
+{
+	local x
+	local y
+	local pl
+	for (( y=0 ; y<my ; y++ )) ; do
+		pl=''
+		for (( x=mx-1; x>=0 ; x-- )) ; do
+			pl+=${parr[y*mx+x]}
+		done
+		echo "$pl"
+	done
+}
+
+countdots()
+{
+	local i
+	local pasize=$(( mx*my ))
+	local cnt=0
+	for (( i=0 ; i<pasize ; i++ )) ; do
+		if [[ "${parr[i]}" = '#' ]] ; then (( cnt++ )) ; fi
+	done
+	echo "Count is $cnt"
+}
+
+
+while IFS= read -r ln; do
+	if [[ ! "$ln" ]] ; then
+		break
+	fi
+	lnarr[i++]=$ln
+	setmax "$ln"
+done
+lcnt=${#lnarr[@]}
+i=0
+
+echo "mx=$mx"
+echo "my=$my"
+
+while IFS= read -r ln; do
+	fpos="${ln##*=}"
+	if [[ "$ln" = *"y="* ]] ; then
+		echo "folding at y=$fpos"
+		foldh
+	elif [[ "$ln" = *"x="* ]] ; then
+		echo "folding at x=$fpos"
+		foldv
+	fi
+	normalize
+	if [[ "$1" ]] ; then break ; fi
+done
+
+construct
+countdots
+if ! [[ "$1" ]] ; then 
+	showparr
+fi
+
