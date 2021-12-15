@@ -1,0 +1,90 @@
+#!/bin/bash
+# polymerization
+
+declare -A instr
+declare -A elems
+crtarr=()
+
+loadarr()
+{
+	local l=${#ln}
+	local i
+	local di=0
+	(( l-- ))
+	for (( i=0 ; i<l ; i++ )) ; do
+		crtarr[di++]=${ln:$i:2}
+#		echo "at $i we have ${ln:$i:2}"
+	done
+}
+
+loadinstr()
+{
+	local ii
+	local v
+	ii=${ln%% *}
+	v=${ln##* }
+	instr[$ii]=$v
+}
+
+step()
+{
+	ln=''
+	local i
+	local l=${#crtarr[@]}
+
+	for (( i=0 ; i<l ; i++ )) ; do
+		crt=${crtarr[i]}
+#		echo "crt=$crt"
+		x=${instr[$crt]}
+		if (( i==0 )) ; then
+			ln+="${crt:0:1}$x${crt:1:1}"
+		else
+			ln+="$x${crt:1:1}"
+		fi
+	done
+	loadarr
+}
+
+count()
+{
+	local i
+	local l=${#crtarr[@]}
+	local v
+	local cmax=0
+	local cmin=$l
+	for x in {A..Z} ; do elems[$x]=0 ; done
+	for (( i=0 ; i<l ; i++ )) ; do
+		v=${crtarr[i]}
+		v="${v:0:1}"
+		(( elems[$v]++ ))
+	done
+	i=$((l-1))
+	v=${crtarr[i]}
+	v="${v:1:1}"
+	(( elems[$v]++ ))
+
+	for x in {A..Z} ; do
+		v=${elems[$x]}
+#		echo "$x:$v"
+		if (( v>cmax )) ; then
+			cmax=$v
+		elif (( v<cmin && v>0 )) ; then
+			cmin=$v
+		fi
+	done
+	echo "Max is $cmax"
+	echo "Min is $cmin"
+}
+
+read -r ln
+loadarr
+read
+while IFS= read -r ln ; do
+	loadinstr
+done
+declare -A instr
+for i in {0..9} ; do
+	step
+	echo "Step $i done"
+done
+count
