@@ -1,0 +1,143 @@
+#!/bin/bash
+# polymerization
+
+declare -A instrl
+declare -A instrr
+declare -A insel
+declare -A elems
+declare -A pairs
+declare -A ptmp
+
+incpair()
+{
+	if [[ ${pairs[$1]} ]] ; then
+		(( pairs[$1]++ ))
+	else
+		pairs[$1]=1
+	fi
+}
+
+loadarr()
+{
+	local l=${#ln}
+	local i
+	local di=0
+	local pair
+	(( l-- ))
+	for (( i=0 ; i<l ; i++ )) ; do
+		incpair ${ln:$i:2}
+	done
+}
+
+countinit()
+{
+	local x
+	local l=${#ln}
+	local v
+	for x in {A..Z} ; do elems[$x]=0 ; done
+	for (( i=0 ; i<l ; i++ )) ; do
+		v=${ln:i:1}
+		(( elems[$v]++ ))
+	done
+}
+
+loadinstr()
+{
+	local idx
+	local v
+	local rs
+	local ls
+	idx=${ln%% *}
+	v=${ln##* }
+	ls="${idx:0:1}$v"
+	rs="$v${idx:1:1}"
+	echo "$ln: $ls - $rs"
+	instrl[$idx]=$ls
+	instrr[$idx]=$rs
+	insel[$idx]=$v
+}
+
+setpval()
+{
+	if [[ ${ptmp[$1]} ]] ; then
+		(( ptmp[$1]+=$2 ))
+	else
+		ptmp[$1]=$2
+	fi
+}
+
+step()
+{
+	local icnt=0
+	local elm
+	echo 'before step'
+	declare -p pairs
+	for crt in "${!pairs[@]}" ; do
+		icnt=${pairs[$crt]}
+		if (( icnt==0 )) ; then continue ; fi
+		pairs[$crt]=0
+		echo "at $crt adding ${instrl[$crt]} and ${instrr[$crt]}"
+		setpval ${instrl[$crt]} $icnt
+		setpval ${instrr[$crt]} $icnt
+		elm=${insel[$crt]}
+#		echo "elm=$elm"
+		(( elems[$elm]+=$icnt ))
+	done
+#	echo 'pairs should only contain 0'
+#	declare -p pairs
+	for crt in "${!ptmp[@]}" ; do
+		pairs[$crt]=${ptmp[$crt]}
+		ptmp[$crt]=0
+	done
+#	echo 'ptmp should only contain 0'
+#	declare -p ptmp
+}
+
+count()
+{
+	local el
+	local er
+	local x
+	local cnt
+	local cmax=0
+	local cmin
+
+# 	for crt in "${!pairs[@]}" ; do
+# 		cnt=${pairs[$crt]}
+# 		el=${crt:0:1}
+# 		er=${crt:1:1}
+# #		(( elems[$el]++ ))
+# 		(( elems[$er]+=cnt ))
+# 	done
+# 
+# 	(( elems[$lme]++ ))
+	
+	for x in {A..Z} ; do
+		cnt=${elems[$x]}
+		if (( cnt!=0 )) ; then echo "$x:$cnt" ; fi
+		if (( cnt>cmax )) ; then cmax=$cnt ; fi
+	done
+	cmin=$cmax
+	for x in {A..Z} ; do
+		cnt=${elems[$x]}
+		if (( cnt!=0 && cnt<cmin )) ; then cmin=$cnt ; fi
+	done
+	echo "Max is $cmax"
+	echo "Min is $cmin"
+}
+
+read -r ln
+echo "$ln"
+loadarr
+countinit
+read
+while IFS= read -r ln ; do
+	loadinstr
+done
+count
+for (( i=0 ; i<40; i++ )) ; do
+	step
+	echo "Step $i done"
+	count
+done
+

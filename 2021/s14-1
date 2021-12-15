@@ -42,6 +42,7 @@ step()
 			ln+="$x${crt:1:1}"
 		fi
 	done
+	echo "$ln"
 	loadarr
 }
 
@@ -65,7 +66,7 @@ count()
 
 	for x in {A..Z} ; do
 		v=${elems[$x]}
-#		echo "$x:$v"
+		if (( v!=0 )) ; then echo "$x:$v" ; fi
 		if (( v>cmax )) ; then
 			cmax=$v
 		elif (( v<cmin && v>0 )) ; then
@@ -82,9 +83,9 @@ read
 while IFS= read -r ln ; do
 	loadinstr
 done
-declare -A instr
+count
 for i in {0..9} ; do
 	step
 	echo "Step $i done"
+	count
 done
-count
