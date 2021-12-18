@@ -7,38 +7,34 @@ struct mypath
 	int y;
 	int cost;
 	mypath *pstep;
-}
+};
 
 /* some globals used everywhere */
 int mx,my;
-mypath *omap;
+mypath **omap;
 char *cmap;
 
 mypath *occupy(int x, int y, mypath *mp)
 {
-	unsigned int mv;
+	unsigned int moff;
 	mypath *np;
-	mv=y*mx+x;
+	moff=y*mx+x;
 	np=malloc(sizeof(mypath));
 	if(!np)
 	{
 		fprintf(stderr,"malloc!\n");
 		exit(1);
 	}
+	printf("Occupy %d,%d\n",x,y);
 	np->x=x;
 	np->y=y;
-	np->cost=cmap[mv];
+	np->cost=cmap[moff];
 	np->pstep=mp;
 
 	/* since we are on what is effectively a tree structure, it's quite difficult
 	 * to free the old branch, so we admit some leaks here */
-	omap[y*mx+x]=np;
+	omap[moff]=np;
 	return np;
-}
-
-int is_occupied(int x, int y)
-{
-	return omap[y*mx+x];
 }
 
 int path_cost(mypath *mp)
@@ -52,27 +48,40 @@ int path_cost(mypath *mp)
 	return rc;
 }
 
-int step(int x, int y, mypath *mp)
+int show_path(mypath *mp)
+{
+	int tc=0;
+	while(mp!=NULL)
+	{
+		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
+		tc+=mp->cost;
+		mp=mp->pstep;
+	}
+	printf("Total=%d\n",tc);
+	return tc;
+}
+
+void step(int x, int y, mypath *mp)
 {
 	mypath *tp;
-	if((tp=omap[y*mx+x])!=NULL)
+	int ocost,mcost;
+	printf("Step at %d,%d with cost %d\n",x,y,path_cost(mp));
+	tp=omap[y*mx+x];
+	if(tp!=NULL)
 	{
-		if(cost(tp)>cost(mp)) /* replace path if we are cheaper */
+		ocost=path_cost(tp->pstep);
+		mcost=path_cost(mp);
+		if(mcost>=ocost) /* stop if we are not cheaper */
 		{
-			occupy(x,y,mp);
+			return;
 		}
-		/* but anyway, stop here */
-		return 1;
 	}
-	else
-	{
-		tp=occupy(x,y,mp);
-		if(x>0) step(x-1,y,tp);
-		if(x<mx) step(x+1,y,tp);
-		if(y>0) step(x,y-1,tp);
-		if(y<my) step(x,y+1,tp);
-	}
-	return 0;
+
+	tp=occupy(x,y,mp);
+	if(x>0) step(x-1,y,tp);
+	if(x<(mx-1)) step(x+1,y,tp);
+	if(y>0) step(x,y-1,tp);
+	if(y<(my-1)) step(x,y+1,tp);
 }
 
 
@@ -82,6 +91,7 @@ int main(int argc, char *argv[])
 	char *crtl;
 	char **lines;
 	int lc,i,j,cmoff;
+	mypath *cp;
 	if(argc!=2)
 	{
 		fprintf(stderr,"Usage: %s <filename>\n",argv[0]);
@@ -117,8 +127,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	
-
+	printf("mx=%d, my=%d\n",mx,my);
+	step(0,0,NULL);
+	show_path(omap[(my-1)*mx+mx-1]);
 
 	free(lines);
 	free(buf);
