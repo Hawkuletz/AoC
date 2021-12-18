@@ -25,7 +25,7 @@ mypath *occupy(int x, int y, mypath *mp)
 		fprintf(stderr,"malloc!\n");
 		exit(1);
 	}
-	printf("Occupy %d,%d\n",x,y);
+//	printf("Occupy %d,%d\n",x,y);
 	np->x=x;
 	np->y=y;
 	np->cost=cmap[moff];
@@ -53,11 +53,11 @@ int show_path(mypath *mp)
 	int tc=0;
 	while(mp!=NULL)
 	{
-		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
+//		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
 		tc+=mp->cost;
 		mp=mp->pstep;
 	}
-	printf("Total=%d\n",tc);
+//	printf("Total=%d\n",tc);
 	return tc;
 }
 
@@ -65,7 +65,7 @@ void step(int x, int y, mypath *mp)
 {
 	mypath *tp;
 	int ocost,mcost;
-	printf("Step at %d,%d with cost %d\n",x,y,path_cost(mp));
+//	printf("Step at %d,%d with cost %d\n",x,y,path_cost(mp));
 	tp=omap[y*mx+x];
 	if(tp!=NULL)
 	{
@@ -78,10 +78,10 @@ void step(int x, int y, mypath *mp)
 	}
 
 	tp=occupy(x,y,mp);
-	if(x>0) step(x-1,y,tp);
 	if(x<(mx-1)) step(x+1,y,tp);
-	if(y>0) step(x,y-1,tp);
 	if(y<(my-1)) step(x,y+1,tp);
+	if(x>0) step(x-1,y,tp);
+	if(y>0) step(x,y-1,tp);
 }
 
 
