@@ -111,19 +111,21 @@ void proc_min(unsigned int lsp)
 		crt=valstack[--sp];
 		if(crt<res) res=crt;
 	}
-	push_val(crt);
+	push_val(res);
 }
 
 void proc_max(unsigned int lsp)
 {
 	uint64_t res=0;
 	uint64_t crt;
+	printf("in procmax\n");
 	while(sp>lsp && sp!=0)	/* sp!=0 just in case */
 	{
 		crt=valstack[--sp];
+		printf("crt=%lu\n",crt);
 		if(crt>res) res=crt;
 	}
-	push_val(crt);
+	push_val(res);
 }
 
 void proc_lt()
