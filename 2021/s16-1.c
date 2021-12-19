@@ -1,9 +1,22 @@
 #include "mystrings.c"
 
+#define PTYP_SUM	0
+#define PTYP_PRD	1
+#define	PTYP_MIN	2
+#define PTYP_MAX	3
 #define PTYP_LIT	4
+#define PTYP_GT		5
+#define PTYP_LT		6
+#define PTYP_EQ		7
+
+#define MY_STACKSIZE 1024
 
 unsigned int version_sum=0;
 
+uint64_t valstack[MY_STACKSIZE];
+unsigned int sp=0;
+
+/* for debug */
 void print_dword_bits(uint32_t x)
 {
 	int i;
@@ -63,14 +76,24 @@ int get_bits(uint8_t *msg, uint32_t pos, uint32_t cnt, uint32_t *res)
 	return 0;
 }
 
+void push_val(uint64_t val)
+{
+	if(sp==MY_STACKSIZE)	/* unlikely, but why not check? :) */
+	{
+		fprintf(stderr,"Virtual submarine machine stack overflow!\n");
+		exit(1);
+	}
+	valstack[sp++]=val;
+}
 
 uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 {
 	uint32_t a,pvers,ptype;
 	uint32_t bli=0, pci=0;
-	uint32_t lval=0;
+	uint64_t lval=0;
 	uint32_t rbits=0;
 	int nibcnt=0;
+	unsigned int lsp=sp;
 	if((msg_size-moff)<6)
 	{
 		fprintf(stderr,"less than 6 bits remaining(%d)\n",msg_size-moff);
@@ -86,26 +109,22 @@ uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 		if(a)
 		{
 			get_bits(msg,moff+7,11,&pci);
-			printf("contains %u packets\n",pci);
 			moff+=7+11;
 			while(pci)
 			{
 				moff=proc_msg(msg,moff,msg_size);
 				pci--;
 			}
-
 		}
 		else
 		{
 			get_bits(msg,moff+7,15,&bli);
-			printf("contains %u bits\n",bli);
 			moff+=7+15;
 			while(bli>6)
 			{
 				rbits=proc_msg(msg,moff,msg_size);
 				bli-=(rbits-moff);
 				moff=rbits;
-				printf("read: %u, remaining: %u\n",rbits,bli);
 			}
 		}
 	}
@@ -119,7 +138,7 @@ uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 			lval|=(a&0xf);
 //			printf("Got %x for literal, nibble %u\n",a,nibcnt);
 			nibcnt++;
-			if(nibcnt>8)
+			if(nibcnt>16)
 			{
 				fprintf(stderr,"Value too large at %u\n",moff);
 				exit(1);
@@ -129,7 +148,8 @@ uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 				lval<<=4;
 			}
 		} while(a&0x10);
-		printf("Value = %u with %u nibbles\n",lval,nibcnt);
+//		printf("Value = %lu with %u nibbles\n",lval,nibcnt);
+		push_val(lval);
 		return moff;
 	}
 	return moff;
@@ -174,7 +194,6 @@ int main(int argc, char *argv[])
 		proc_msg(msg,0,msg_size);
 		printf("Version sum is %u\n",version_sum);
 	}
-
 
 /*	get_bits(ta,3,10,&t);
 	print_dword_bits(t); */
