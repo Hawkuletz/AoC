@@ -19,6 +19,7 @@ unsigned int steps=0;
 mypath *occupy(int x, int y, mypath *mp)
 {
 	unsigned int moff;
+	unsigned int oldc=0;
 	mypath *np;
 	moff=y*mx+x;
 	np=malloc(sizeof(mypath));
@@ -28,9 +29,10 @@ mypath *occupy(int x, int y, mypath *mp)
 		exit(1);
 	}
 //	printf("Occupy %d,%d\n",x,y);
+	if(mp!=NULL) oldc=mp->cost;
 	np->x=x;
 	np->y=y;
-	np->cost=cmap[moff];
+	np->cost=oldc+cmap[moff];
 	np->pstep=mp;
 
 	/* since we are on what is effectively a tree structure, it's quite difficult
@@ -53,13 +55,13 @@ int path_cost(mypath *mp)
 int show_path(mypath *mp)
 {
 	int tc=0;
+	printf("Total=%d\n",mp->cost);
 	while(mp!=NULL)
 	{
-		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
+		printf("At %d,%d, cost=%d\n",mp->x,mp->y,mp->cost);
 		tc+=mp->cost;
 		mp=mp->pstep;
 	}
-	printf("Total=%d\n",tc);
 	return tc;
 }
 
@@ -72,8 +74,11 @@ void step(int x, int y, mypath *mp)
 	tp=omap[y*mx+x];
 	if(tp!=NULL)
 	{
-		ocost=path_cost(tp->pstep);
-		mcost=path_cost(mp);
+		ocost=tp->cost;
+		if(mp!=NULL)
+			mcost=mp->cost+cmap[y*mx+x];
+		else
+			mcost=cmap[y*mx+x];
 		if(mcost>=ocost) /* stop if we are not cheaper */
 		{
 			return;
