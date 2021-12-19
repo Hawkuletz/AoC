@@ -14,6 +14,8 @@ int mx,my;
 mypath **omap;
 char *cmap;
 
+unsigned int steps=0;
+
 mypath *occupy(int x, int y, mypath *mp)
 {
 	unsigned int moff;
@@ -53,11 +55,11 @@ int show_path(mypath *mp)
 	int tc=0;
 	while(mp!=NULL)
 	{
-//		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
+		printf("At %d,%x, cost=%x\n",mp->x,mp->y,mp->cost);
 		tc+=mp->cost;
 		mp=mp->pstep;
 	}
-//	printf("Total=%d\n",tc);
+	printf("Total=%d\n",tc);
 	return tc;
 }
 
@@ -65,6 +67,7 @@ void step(int x, int y, mypath *mp)
 {
 	mypath *tp;
 	int ocost,mcost;
+	steps++;
 //	printf("Step at %d,%d with cost %d\n",x,y,path_cost(mp));
 	tp=omap[y*mx+x];
 	if(tp!=NULL)
@@ -130,6 +133,8 @@ int main(int argc, char *argv[])
 	printf("mx=%d, my=%d\n",mx,my);
 	step(0,0,NULL);
 	show_path(omap[(my-1)*mx+mx-1]);
+
+	printf("After %u steps\n",steps);
 
 	free(lines);
 	free(buf);
