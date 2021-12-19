@@ -247,8 +247,8 @@ int main(int argc, char *argv[])
 			cmoff++;
 		}
 	}
-
-	embiggen(lc);
+	if(c2)
+		embiggen(lc);
 /*
 	for(i=0;i<my;i++)
 	{
