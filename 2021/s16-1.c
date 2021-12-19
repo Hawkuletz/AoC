@@ -86,6 +86,121 @@ void push_val(uint64_t val)
 	valstack[sp++]=val;
 }
 
+void proc_sum(unsigned int lsp)
+{
+	uint64_t res=0;
+	while(sp>lsp && sp!=0)	/* sp!=0 just in case */
+		res+=valstack[--sp];
+	push_val(res);
+}
+
+void proc_prod(unsigned int lsp)
+{
+	uint64_t res=1;
+	while(sp>lsp && sp!=0)	/* sp!=0 just in case */
+		res*=valstack[--sp];
+	push_val(res);
+}
+
+void proc_min(unsigned int lsp)
+{
+	uint64_t res=UINT64_MAX;
+	uint64_t crt;
+	while(sp>lsp && sp!=0)	/* sp!=0 just in case */
+	{
+		crt=valstack[--sp];
+		if(crt<res) res=crt;
+	}
+	push_val(crt);
+}
+
+void proc_max(unsigned int lsp)
+{
+	uint64_t res=0;
+	uint64_t crt;
+	while(sp>lsp && sp!=0)	/* sp!=0 just in case */
+	{
+		crt=valstack[--sp];
+		if(crt>res) res=crt;
+	}
+	push_val(crt);
+}
+
+void proc_lt()
+{
+	if(sp<2)
+	{
+		fprintf(stderr,"Virtual submarine machine stack underflow while proc_lt!\n");
+		exit(1);
+	}
+	sp-=2;
+	if(valstack[sp]<valstack[sp+1])
+		push_val(1);
+	else
+		push_val(0);
+}
+
+void proc_gt()
+{
+	if(sp<2)
+	{
+		fprintf(stderr,"Virtual submarine machine stack underflow while proc_lt!\n");
+		exit(1);
+	}
+	sp-=2;
+	if(valstack[sp]>valstack[sp+1])
+		push_val(1);
+	else
+		push_val(0);
+}
+
+void proc_eq()
+{
+	if(sp<2)
+	{
+		fprintf(stderr,"Virtual submarine machine stack underflow while proc_lt!\n");
+		exit(1);
+	}
+	sp-=2;
+	if(valstack[sp]==valstack[sp+1])
+		push_val(1);
+	else
+		push_val(0);
+}
+
+
+void proc_stack(uint32_t ptype, unsigned int lsp)
+{
+	switch(ptype)
+	{
+		case PTYP_SUM:
+			proc_sum(lsp);
+			break;
+		case PTYP_PRD:
+			proc_prod(lsp);
+			break;
+		case PTYP_MIN:
+			proc_min(lsp);
+			break;
+		case PTYP_MAX:
+			proc_max(lsp);
+			break;
+		case PTYP_GT:
+			proc_gt();
+			break;
+		case PTYP_LT:
+			proc_lt();
+			break;
+		case PTYP_EQ:
+			proc_eq();
+			break;
+		default:
+			fprintf(stderr,"Unknown op type %u\n",ptype);
+			exit(1);
+	}
+
+}
+
 uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 {
 	uint32_t a,pvers,ptype;
@@ -127,6 +242,7 @@ uint32_t proc_msg(uint8_t *msg, uint32_t moff, int msg_size)
 				moff=rbits;
 			}
 		}
+		proc_stack(ptype,lsp);
 	}
 	else
 	{
@@ -194,6 +310,11 @@ int main(int argc, char *argv[])
 		proc_msg(msg,0,msg_size);
 		printf("Version sum is %u\n",version_sum);
 	}
+	if(sp==1)
+		printf("result=%lu\n",valstack[0]);
+	else
+		printf("Something went wrong... sp is %u\n",sp);
+
 
 /*	get_bits(ta,3,10,&t);
 	print_dword_bits(t); */
