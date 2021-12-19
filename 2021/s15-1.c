@@ -156,15 +156,45 @@ void proc_front()
 	crtfront=0;
 }
 
+void line1plus(int soff, int doff, int l)
+{
+	int i;
+	char c;
+	for(i=0;i<l;i++)
+	{
+		c=1+cmap[soff+i];
+		if(c==10) c=1;
+		cmap[doff+i]=c;
+	}
+
+}
+
+void embiggen(int ybsize)
+{
+	int b,y,soff,doff;
+	for(b=1;b<5;b++)
+		for(y=0;y<ybsize;y++)
+		{
+			soff=((b-1)*ybsize+y)*mx;
+			doff=(b*ybsize+y)*mx;
+			line1plus(soff,doff,mx);
+		}
+}
+
+
+
+
 int main(int argc, char *argv[])
 {
 	char *buf;
 	char *crtl;
 	char **lines;
-	int lc,i,j,cmoff;
-	if(argc!=2)
+	char cc;
+	int lc,i,j,k,l,cmoff,mxo;
+	int c2=0;	/* challenge 2 */
+	if(argc<2)
 	{
-		fprintf(stderr,"Usage: %s <filename>\n",argv[0]);
+		fprintf(stderr,"Usage: %s <filename> [2]\n",argv[0]);
 		exit(1);
 	}
 	buf=file2buf(argv[1]);
@@ -179,8 +209,16 @@ int main(int argc, char *argv[])
 		fprintf(stderr,"Unable to read or no lines found\n");
 		exit(1);
 	}
+
 	mx=strlen(lines[0]);	/* assume rectangular shape */
+	mxo=mx;
 	my=lc;
+	if(argc==3 && atoi(argv[2])==2) /* make it bigger! */
+	{
+		c2=1;
+		mx=mx*5;
+		my=my*5;
+	}
 	/* occupy map */
 	omap=calloc(mx*my,sizeof(mypath *));
 	/* cost map */
@@ -188,14 +226,37 @@ int main(int argc, char *argv[])
 
 	/* copy data into cmap */
 	cmoff=0;
-	for (i=0;i<my;i++)
+	for (i=0;i<lc;i++)
 	{
 		crtl=lines[i];
-		for(j=0;j<mx;j++)
+		cmoff=i*mx;
+		for(j=0;j<mxo;j++)
 		{
-			cmap[cmoff++]=crtl[j]-0x30;
+			cc=crtl[j]&0x0f;
+			cmap[cmoff]=cc;
+			if(c2)
+			{
+				for(k=1;k<5;k++)
+				{
+					cc++;
+					if(cc>9) cc=1;
+					cmap[cmoff+mxo*k]=cc;
+//					cmap[cmoff+mx*(lc*k)]=cc;
+				}
+			}
+			cmoff++;
 		}
 	}
+
+	embiggen(lc);
+/*
+	for(i=0;i<my;i++)
+	{
+		for(j=0;j<mx;j++)
+			printf("%d",cmap[i*mx+j]);
+		printf("\n");
+	}
+*/
 
 	printf("mx=%d, my=%d\n",mx,my);
 
@@ -215,6 +276,8 @@ int main(int argc, char *argv[])
 	show_path(omap[(my-1)*mx+mx-1]);
 
 	printf("After %u steps\n",steps);
+
+	printf("Cost is %d",omap[(my-1)*mx+mx-1]->cost);
 
 	free(lines);
 	free(buf);
