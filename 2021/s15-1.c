@@ -35,7 +35,7 @@ mypath *occupy(int x, int y, mypath *mp)
 		fprintf(stderr,"malloc!\n");
 		exit(1);
 	}
-//	printf("Occupy %d,%d\n",x,y);
+
 	np->x=x;
 	np->y=y;
 	np->cost=oldc+cmap[moff];
@@ -49,7 +49,6 @@ int show_path(mypath *mp)
 {
 	int tc=0;
 	if(mp==NULL) return 0;
-	printf("Total=%d\n",mp->cost);
 	tc=mp->cost;
 	while(mp!=NULL)
 	{
@@ -57,32 +56,6 @@ int show_path(mypath *mp)
 		mp=mp->pstep;
 	}
 	return tc;
-}
-
-void step(int x, int y, mypath *mp)
-{
-	mypath *tp;
-	int ocost,mcost;
-	steps++;
-//	printf("Step at %d,%d with cost %d\n",x,y,path_cost(mp));
-	tp=omap[y*mx+x];
-	if(tp!=NULL)
-	{
-		ocost=tp->cost;
-		if(mp!=NULL)
-			mcost=mp->cost+cmap[y*mx+x];
-		else
-			mcost=cmap[y*mx+x];
-
-		/* stop if we are not cheaper */
-		if(mcost>=ocost) return;
-	}
-
-	tp=occupy(x,y,mp);
-	if(x>0) step(x-1,y,tp);
-	if(x<(mx-1)) step(x+1,y,tp);
-	if(y>0) step(x,y-1,tp);
-	if(y<(my-1)) step(x,y+1,tp);
 }
 
 void add2front(mypath *p)
@@ -156,6 +129,8 @@ void proc_front()
 	crtfront=0;
 }
 
+
+/* quick&(very)dirty enlarge helper */
 void line1plus(int soff, int doff, int l)
 {
 	int i;
@@ -166,9 +141,9 @@ void line1plus(int soff, int doff, int l)
 		if(c==10) c=1;
 		cmap[doff+i]=c;
 	}
-
 }
 
+/* quick&(very)dirty enlarge for 2nd part of the challenge */
 void embiggen(int ybsize)
 {
 	int b,y,soff,doff;
@@ -221,7 +196,7 @@ int main(int argc, char *argv[])
 	}
 	/* occupy map */
 	omap=calloc(mx*my,sizeof(mypath *));
-	/* cost map */
+	/* (original) cost map */
 	cmap=malloc(mx*my);
 
 	/* copy data into cmap */
@@ -241,7 +216,6 @@ int main(int argc, char *argv[])
 					cc++;
 					if(cc>9) cc=1;
 					cmap[cmoff+mxo*k]=cc;
-//					cmap[cmoff+mx*(lc*k)]=cc;
 				}
 			}
 			cmoff++;
@@ -249,6 +223,8 @@ int main(int argc, char *argv[])
 	}
 	if(c2)
 		embiggen(lc);
+
+	/* show cost map, for debug */
 /*
 	for(i=0;i<my;i++)
 	{
@@ -272,12 +248,11 @@ int main(int argc, char *argv[])
 		proc_front();
 	}
 
-/*	step(0,0,NULL,0); */
 	show_path(omap[(my-1)*mx+mx-1]);
 
 	printf("After %u steps\n",steps);
-
-	printf("Cost is %d",omap[(my-1)*mx+mx-1]->cost);
+	/* challenge demands cost without the first cave */
+	printf("Cost is %d",omap[(my-1)*mx+mx-1]->cost-cmap[0]);
 
 	free(lines);
 	free(buf);
